@@ -17,18 +17,17 @@ import org.apache.flink.util.Collector;
 public class FlatmapDemo {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(1);
-
+        env.setParallelism(2);
         DataStreamSource<WaterSensor> sensorDS = env.fromElements(
                 new WaterSensor("s1", 1L, 1),
                 new WaterSensor("s1", 11L, 11),
                 new WaterSensor("s2", 2L, 2),
                 new WaterSensor("s3", 3L, 3)
         );
-
-
+        sensorDS.print();
+        env.execute();
         /**
-         * TODO flatmap： 一进多出（包含0出）
+         * flatmap：一进多出（包含0出）
          *      对于s1的数据，一进一出
          *      对于s2的数据，一进2出
          *      对于s3的数据，一进0出（类似于过滤的效果）
@@ -43,7 +42,7 @@ public class FlatmapDemo {
          */
         SingleOutputStreamOperator<String> flatmap = sensorDS.flatMap(new FlatMapFunction<WaterSensor, String>() {
             @Override
-            public void flatMap(WaterSensor value, Collector<String> out) throws Exception {
+            public void flatMap(WaterSensor value, Collector<String> out) {
                 if ("s1".equals(value.getId())) {
                     // 如果是 s1，输出 vc
                     out.collect(value.getVc().toString());
@@ -52,14 +51,10 @@ public class FlatmapDemo {
                     out.collect(value.getTs().toString());
                     out.collect(value.getVc().toString());
                 }
+                out.collect(value.getId());
             }
         });
-
         flatmap.print();
-
-
         env.execute();
     }
-
-
 }

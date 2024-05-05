@@ -22,6 +22,7 @@ public class EnvDemo {
 
         Configuration conf = new Configuration();
         conf.set(RestOptions.BIND_PORT, "8082");
+        conf.set(RestOptions.BIND_ADDRESS, "localhost");
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment
 //                .getExecutionEnvironment();  // 自动识别是 远程集群 ，还是idea本地环境
@@ -33,12 +34,12 @@ public class EnvDemo {
         // 流批一体：代码api是同一套，可以指定为 批，也可以指定为 流
         // 默认 STREAMING
         // 一般不在代码写死，提交时 参数指定：-Dexecution.runtime-mode=BATCH
-        env.setRuntimeMode(RuntimeExecutionMode.BATCH);
+//        env.setRuntimeMode(RuntimeExecutionMode.BATCH);
 
 
         env
-//                .socketTextStream("hadoop102", 7777)
-                .readTextFile("input/word.txt")
+                .socketTextStream("node1", 7777)
+//                .readTextFile("input/word.txt")
                 .flatMap(
                         (String value, Collector<Tuple2<String, Integer>> out) -> {
                             String[] words = value.split(" ");
@@ -52,7 +53,8 @@ public class EnvDemo {
                 .sum(1)
                 .print();
 
-        env.execute();
+        JobExecutionResult res = env.execute();
+        System.out.println(res);
         /** TODO 关于execute总结(了解)
          *     1、默认 env.execute()触发一个flink job：
          *          一个main方法可以调用多个execute，但是没意义，指定到第一个就会阻塞住

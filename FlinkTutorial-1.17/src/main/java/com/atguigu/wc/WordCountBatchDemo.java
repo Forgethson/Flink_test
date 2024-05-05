@@ -23,19 +23,20 @@ public class WordCountBatchDemo {
 //        DataSource<String> lineDS = env.readTextFile("hdfs://node1:8020/wjd/word.txt");
         DataSource<String> lineDS = env.readTextFile("input/word.txt");
         // 3.切分、转换 （word，1）
-        FlatMapOperator<String, Tuple2<String, Integer>> wordAndOne = lineDS.flatMap(new FlatMapFunction<String, Tuple2<String, Integer>>() {
-            @Override
-            public void flatMap(String value, Collector<Tuple2<String, Integer>> out) throws Exception {
-                // 3.1 按照 空格 切分单词
-                String[] words = value.split(" ");
-                // 3.2 将 单词 转换为（word，1）
-                for (String word : words) {
-                    Tuple2<String, Integer> wordTuple2 = Tuple2.of(word, 1);
-                    // 3.3 使用 Collector 向下游发送数据
-                    out.collect(wordTuple2);
-                }
-            }
-        });
+        FlatMapOperator<String, Tuple2<String, Integer>> wordAndOne = lineDS.flatMap(
+                new FlatMapFunction<String, Tuple2<String, Integer>>() {
+                    @Override
+                    public void flatMap(String value, Collector<Tuple2<String, Integer>> out) throws Exception {
+                        // 3.1 按照 空格 切分单词
+                        String[] words = value.split(" ");
+                        // 3.2 将 单词 转换为（word，1）
+                        for (String word : words) {
+                            Tuple2<String, Integer> wordTuple2 = Tuple2.of(word, 1);
+                            // 3.3 使用 Collector 向下游发送数据
+                            out.collect(wordTuple2);
+                        }
+                    }
+                });
         // 4.按照 word 分组
         UnsortedGrouping<Tuple2<String, Integer>> wordAndOneGroupby = wordAndOne.groupBy(0);
         // 5.各分组内聚合

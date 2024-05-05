@@ -9,9 +9,9 @@ import java.util.Objects;
  * @version 1.0
  */
 public class WaterSensor {
-    public String id;
-    public Long ts;
-    public Integer vc;
+    private String id;
+    private Long ts;
+    private Integer vc;
 
     // 一定要提供一个 空参 的构造器
     public WaterSensor() {
@@ -73,7 +73,6 @@ public class WaterSensor {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(id, ts, vc);
     }
 }

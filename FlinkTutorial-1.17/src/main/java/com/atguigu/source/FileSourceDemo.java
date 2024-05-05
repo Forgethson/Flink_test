@@ -14,31 +14,19 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
  */
 public class FileSourceDemo {
     public static void main(String[] args) throws Exception {
-
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
         env.setParallelism(1);
-
-        // TODO 从文件读： 新Source架构
-
+        // 从文件读：新Source架构
         FileSource<String> fileSource = FileSource
                 .forRecordStreamFormat(
                         new TextLineInputFormat(),
                         new Path("input/word.txt")
-                )
-                .build();
-
-        env
-                .fromSource(fileSource, WatermarkStrategy.noWatermarks(), "filesource")
-                .print();
-
-
+                ).build();
+        env.fromSource(fileSource, WatermarkStrategy.noWatermarks(), "filesource").print();
         env.execute();
     }
 }
 /**
- *
  * 新的Source写法：
- *   env.fromSource(Source的实现类，Watermark，名字)
- *
+ * env.fromSource(Source的实现类，Watermark，名字)
  */

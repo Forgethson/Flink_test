@@ -51,7 +51,7 @@ public class ReduceDemo {
             public WaterSensor reduce(WaterSensor value1, WaterSensor value2) throws Exception {
                 System.out.println("value1=" + value1);
                 System.out.println("value2=" + value2);
-                return new WaterSensor(value1.id, value2.ts, value1.vc + value2.vc);
+                return new WaterSensor(value1.getId(), value2.getTs(), value1.getVc() + value2.getVc());
             }
         });
 
