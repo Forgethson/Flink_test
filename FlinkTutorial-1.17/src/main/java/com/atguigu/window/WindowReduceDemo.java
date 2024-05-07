@@ -33,10 +33,8 @@ public class WindowReduceDemo {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(3);
-
         DataStreamSource<WaterSensor> sensorDS = DataSourceUtil.getWaterSensorDataStreamSource(env);
         KeyedStream<WaterSensor, String> sensorKS = sensorDS.keyBy(WaterSensor::getId);
-
         // 1. 窗口分配器
         WindowedStream<WaterSensor, String, TimeWindow> sensorWS = sensorKS.window(TumblingProcessingTimeWindows.of(Time.seconds(10)));
         // 2. 窗口函数
@@ -58,6 +56,4 @@ public class WindowReduceDemo {
         reduce.print();
         env.execute();
     }
-
-
 }

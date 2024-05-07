@@ -25,7 +25,7 @@ public class DataSourceUtil {
                         return new WaterSensor(keys.get(random.nextInt(keys.size())), value, value.intValue());
                     }
                 },
-                Integer.MAX_VALUE,
+                1000L,
                 RateLimiterStrategy.perSecond(3),
                 Types.POJO(WaterSensor.class)
         );
