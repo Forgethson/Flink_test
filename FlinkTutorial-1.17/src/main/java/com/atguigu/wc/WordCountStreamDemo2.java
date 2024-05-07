@@ -36,12 +36,13 @@ public class WordCountStreamDemo2 {
                     }
                 });
         // 3.15 转化为2元组
-        SingleOutputStreamOperator<Tuple2<String, Integer>> wordAndOneDS = words.map(new MapFunction<String, Tuple2<String, Integer>>() {
-            @Override
-            public Tuple2<String, Integer> map(String value) {
-                return Tuple2.of(value, 1);
-            }
-        });
+        SingleOutputStreamOperator<Tuple2<String, Integer>> wordAndOneDS = words.map(
+                new MapFunction<String, Tuple2<String, Integer>>() {
+                    @Override
+                    public Tuple2<String, Integer> map(String value) {
+                        return Tuple2.of(value, 1);
+                    }
+                });
         // 3.2 分组
         KeyedStream<Tuple2<String, Integer>, String> wordAndOneKS = wordAndOneDS.keyBy(
                 new KeySelector<Tuple2<String, Integer>, String>() {

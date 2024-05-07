@@ -21,7 +21,7 @@ import java.time.ZoneId;
 import java.util.TimeZone;
 
 /**
- * TODO
+ * 输出到文件
  *
  * @author cjp
  * @version 1.0
@@ -29,36 +29,31 @@ import java.util.TimeZone;
 public class SinkFile {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
-        // TODO 每个目录中，都有 并行度个数的 文件在写入
+        //  每个目录中，都有"并行度个数"的文件在写入
         env.setParallelism(2);
-
-        // 必须开启checkpoint，否则一直都是 .inprogress
-        env.enableCheckpointing(2000, CheckpointingMode.EXACTLY_ONCE);
-
-
+        // 必须开启checkpoint，否则一直都是 inprogress
+        env.enableCheckpointing(1000, CheckpointingMode.EXACTLY_ONCE);
+        // 模拟数据源
         DataGeneratorSource<String> dataGeneratorSource = new DataGeneratorSource<>(
                 new GeneratorFunction<Long, String>() {
                     @Override
-                    public String map(Long value) throws Exception {
+                    public String map(Long value) {
                         return "Number:" + value;
                     }
                 },
                 Long.MAX_VALUE,
-                RateLimiterStrategy.perSecond(1000),
+                RateLimiterStrategy.perSecond(10),
                 Types.STRING
         );
-
         DataStreamSource<String> dataGen = env.fromSource(dataGeneratorSource, WatermarkStrategy.noWatermarks(), "data-generator");
-
-        // TODO 输出到文件系统
+        // 输出到文件系统
         FileSink<String> fieSink = FileSink
                 // 输出行式存储的文件，指定路径、指定编码
-                .<String>forRowFormat(new Path("f:/tmp"), new SimpleStringEncoder<>("UTF-8"))
+                .<String>forRowFormat(new Path("./output"), new SimpleStringEncoder<>("UTF-8"))
                 // 输出文件的一些配置： 文件名的前缀、后缀
                 .withOutputFileConfig(
                         OutputFileConfig.builder()
-                                .withPartPrefix("atguigu-")
+                                .withPartPrefix("wjd")
                                 .withPartSuffix(".log")
                                 .build()
                 )
@@ -68,14 +63,11 @@ public class SinkFile {
                 .withRollingPolicy(
                         DefaultRollingPolicy.builder()
                                 .withRolloverInterval(Duration.ofMinutes(1))
-                                .withMaxPartSize(new MemorySize(1024*1024))
+                                .withMaxPartSize(new MemorySize(1024 * 1024))
                                 .build()
                 )
                 .build();
-
-
         dataGen.sinkTo(fieSink);
-
         env.execute();
     }
 }

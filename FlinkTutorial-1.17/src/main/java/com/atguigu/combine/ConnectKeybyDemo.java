@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TODO 连接两条流，输出能根据id匹配上的数据（类似inner join效果）
+ * 连接两条流，输出能根据id匹配上的数据（类似inner join效果）
  *
  * @author cjp
  * @version 1.0
