@@ -49,7 +49,7 @@ public class WindowReduceDemo {
                     @Override
                     public WaterSensor reduce(WaterSensor ws1, WaterSensor ws2) {
 //                        System.out.println("调用reduce方法，ws1=" + ws1 + ",ws2=" + ws2);
-                        return new WaterSensor(ws1.getId(), ws1.getTs() + ws2.getTs(), ws1.getVc() + ws2.getVc());
+                        return new WaterSensor(ws1.getId(), ws1.getTs(), ws1.getVc() + ws2.getVc());
                     }
                 }
         );

@@ -10,8 +10,8 @@ import java.util.Objects;
  */
 public class WaterSensor {
     private String id;
-    private Long ts;
-    private Integer vc;
+    private Long ts; // timestamp
+    private Integer vc; // 水位记录
 
     // 一定要提供一个 空参 的构造器
     public WaterSensor() {

@@ -22,7 +22,7 @@ public class DataSourceUtil {
                 new GeneratorFunction<Long, WaterSensor>() {
                     @Override
                     public WaterSensor map(Long value) {
-                        return new WaterSensor(keys.get(random.nextInt(keys.size())), value, value.intValue());
+                        return new WaterSensor(keys.get(random.nextInt(keys.size())), System.currentTimeMillis(), value.intValue());
                     }
                 },
                 1000L,
