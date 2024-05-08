@@ -37,6 +37,7 @@ public class WindowAggregateDemo {
          * 3、窗口输出时调用一次getResult方法
          * 4、输入、中间累加器、输出 类型可以不一样，非常灵活
          */
+
         // 验证结果是否和调用sum一致
         // sensorWS.sum("vc").print();
         SingleOutputStreamOperator<String> aggregate = sensorWS.aggregate(
