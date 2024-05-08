@@ -21,6 +21,7 @@ public class WindowJoinDemo {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
 
+        // 输入流1（table1）
         SingleOutputStreamOperator<Tuple2<String, Integer>> ds1 = env
                 .fromElements(
                         Tuple2.of("a", 1),
@@ -34,23 +35,23 @@ public class WindowJoinDemo {
                                 .withTimestampAssigner((value, ts) -> value.f1 * 1000L)
                 );
 
-
-        SingleOutputStreamOperator<Tuple3<String, Integer,Integer>> ds2 = env
+        // 输入流2（table2）
+        SingleOutputStreamOperator<Tuple3<String, Integer, Integer>> ds2 = env
                 .fromElements(
-                        Tuple3.of("a", 1,1),
-                        Tuple3.of("a", 11,1),
-                        Tuple3.of("b", 2,1),
-                        Tuple3.of("b", 12,1),
-                        Tuple3.of("c", 14,1),
-                        Tuple3.of("d", 15,1)
+                        Tuple3.of("a", 1, 1),
+                        Tuple3.of("a", 11, 1),
+                        Tuple3.of("b", 2, 1),
+                        Tuple3.of("b", 12, 1),
+                        Tuple3.of("c", 14, 1),
+                        Tuple3.of("d", 15, 1)
                 )
                 .assignTimestampsAndWatermarks(
                         WatermarkStrategy
-                                .<Tuple3<String, Integer,Integer>>forMonotonousTimestamps()
+                                .<Tuple3<String, Integer, Integer>>forMonotonousTimestamps()
                                 .withTimestampAssigner((value, ts) -> value.f1 * 1000L)
                 );
 
-        // TODO window join
+        // window join
         // 1. 落在同一个时间窗口范围内才能匹配
         // 2. 根据keyby的key，来进行匹配关联
         // 3. 只能拿到匹配上的数据，类似有固定时间范围的inner join
@@ -63,17 +64,13 @@ public class WindowJoinDemo {
                      * 关联上的数据，调用join方法
                      * @param first  ds1的数据
                      * @param second ds2的数据
-                     * @return
-                     * @throws Exception
                      */
                     @Override
-                    public String join(Tuple2<String, Integer> first, Tuple3<String, Integer, Integer> second) throws Exception {
+                    public String join(Tuple2<String, Integer> first, Tuple3<String, Integer, Integer> second) {
                         return first + "<----->" + second;
                     }
                 });
-
         join.print();
-
         env.execute();
     }
 }

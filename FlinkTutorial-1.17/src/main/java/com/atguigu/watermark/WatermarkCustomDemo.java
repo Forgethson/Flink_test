@@ -2,10 +2,12 @@ package com.atguigu.watermark;
 
 import com.atguigu.bean.WaterSensor;
 import com.atguigu.functions.WaterSensorMapFunction;
+import com.atguigu.utils.DataSourceUtil;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.flink.api.common.eventtime.WatermarkGenerator;
 import org.apache.flink.api.common.eventtime.WatermarkGeneratorSupplier;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
@@ -17,7 +19,7 @@ import org.apache.flink.util.Collector;
 import java.time.Duration;
 
 /**
- * TODO
+ * 自定义水位线生成策略
  *
  * @author cjp
  * @version 1.0
@@ -25,36 +27,26 @@ import java.time.Duration;
 public class WatermarkCustomDemo {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(1);
-
+        env.setParallelism(3);
+        DataStreamSource<WaterSensor> sensorDS = DataSourceUtil.getWaterSensorDataStreamSource(env);
 
         // 默认周期 200ms
         env.getConfig().setAutoWatermarkInterval(2000);
 
-
-        SingleOutputStreamOperator<WaterSensor> sensorDS = env
-                .socketTextStream("hadoop102", 7777)
-                .map(new WaterSensorMapFunction());
-
         WatermarkStrategy<WaterSensor> watermarkStrategy = WatermarkStrategy
-                // TODO 指定 自定义的 生成器
                 // 1.自定义的 周期性生成
-//                .<WaterSensor>forGenerator(ctx -> new MyPeriodWatermarkGenerator<>(3000L))
+                .<WaterSensor>forGenerator(ctx -> new MyPeriodWatermarkGenerator<>(3000L))
                 // 2.自定义的 断点式生成
-                .<WaterSensor>forGenerator(ctx -> new MyPuntuatedWatermarkGenerator<>(3000L))
-                .withTimestampAssigner(
-                        (element, recordTimestamp) -> {
-                            return element.getTs() * 1000L;
-                        });
+//                .<WaterSensor>forGenerator(ctx -> new MyPuntuatedWatermarkGenerator<>(3000L))
+                .withTimestampAssigner((element, recordTimestamp) -> element.getTs());
 
         SingleOutputStreamOperator<WaterSensor> sensorDSwithWatermark = sensorDS.assignTimestampsAndWatermarks(watermarkStrategy);
 
 
-        sensorDSwithWatermark.keyBy(sensor -> sensor.getId())
+        sensorDSwithWatermark.keyBy(WaterSensor::getId)
                 .window(TumblingEventTimeWindows.of(Time.seconds(10)))
                 .process(
                         new ProcessWindowFunction<WaterSensor, String, String, TimeWindow>() {
-
                             @Override
                             public void process(String s, Context context, Iterable<WaterSensor> elements, Collector<String> out) throws Exception {
                                 long startTs = context.window().getStart();
@@ -69,7 +61,6 @@ public class WatermarkCustomDemo {
                         }
                 )
                 .print();
-
         env.execute();
     }
 }

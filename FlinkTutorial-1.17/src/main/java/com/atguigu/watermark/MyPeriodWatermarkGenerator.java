@@ -14,7 +14,7 @@ public class MyPeriodWatermarkGenerator<T> implements WatermarkGenerator<T> {
 
     // 乱序等待时间
     private long delayTs;
-    // 用来保存 当前为止 最大的事件时间
+    // 当前为止最大的事件时间
     private long maxTs;
 
     public MyPeriodWatermarkGenerator(long delayTs) {
@@ -23,7 +23,7 @@ public class MyPeriodWatermarkGenerator<T> implements WatermarkGenerator<T> {
     }
 
     /**
-     * 每条数据来，都会调用一次： 用来提取最大的事件时间，保存下来
+     * 每条数据来，都会调用一次，保存当前为止最大的事件时间（更新maxTs）
      *
      * @param event
      * @param eventTimestamp 提取到的数据的 事件时间
@@ -36,12 +36,13 @@ public class MyPeriodWatermarkGenerator<T> implements WatermarkGenerator<T> {
     }
 
     /**
-     * 周期性调用： 发射 watermark
+     * 周期性调用：更新watermark
      *
      * @param output
      */
     @Override
     public void onPeriodicEmit(WatermarkOutput output) {
+        // 更新 watermark = maxTs - delayTs - 1
         output.emitWatermark(new Watermark(maxTs - delayTs - 1));
         System.out.println("调用onPeriodicEmit方法，生成watermark=" + (maxTs - delayTs - 1));
     }
