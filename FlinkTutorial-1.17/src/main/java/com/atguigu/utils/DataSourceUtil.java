@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Random;
 
 public class DataSourceUtil {
+    private static final Random random = new Random();
 
     public static DataStreamSource<WaterSensor> getWaterSensorDataStreamSource(StreamExecutionEnvironment env) {
-        Random random = new Random();
         List<String> keys = Arrays.asList("s1", "s2", "s3");
         DataGeneratorSource<WaterSensor> dataGeneratorSource = new DataGeneratorSource<>(
                 new GeneratorFunction<Long, WaterSensor>() {
@@ -31,5 +31,24 @@ public class DataSourceUtil {
         );
         DataStreamSource<WaterSensor> sensorDS = env.fromSource(dataGeneratorSource, WatermarkStrategy.noWatermarks(), "data-generator");
         return sensorDS;
+    }
+
+    public static DataStreamSource<Integer> getNumberDataStreamSource(StreamExecutionEnvironment env) {
+        DataGeneratorSource<Integer> dataGeneratorSource = new DataGeneratorSource<>(
+                new GeneratorFunction<Long, Integer>() {
+                    @Override
+                    public Integer map(Long value) {
+//                        if (value % 2 == 0) {
+//                            return value.intValue() + 1;
+//                        }
+                        return value.intValue();
+                    }
+                },
+                10000L,
+                RateLimiterStrategy.perSecond(3),
+                Types.INT
+        );
+        DataStreamSource<Integer> numberDS = env.fromSource(dataGeneratorSource, WatermarkStrategy.noWatermarks(), "number-data-generator");
+        return numberDS;
     }
 }
