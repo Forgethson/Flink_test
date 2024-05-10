@@ -18,11 +18,13 @@ public class DataSourceUtil {
 
     public static DataStreamSource<WaterSensor> getWaterSensorDataStreamSource(StreamExecutionEnvironment env) {
         List<String> keys = Arrays.asList("s1", "s2", "s3");
+        int vcUpperBD = 3;
         DataGeneratorSource<WaterSensor> dataGeneratorSource = new DataGeneratorSource<>(
                 new GeneratorFunction<Long, WaterSensor>() {
                     @Override
                     public WaterSensor map(Long value) {
-                        return new WaterSensor(keys.get(random.nextInt(keys.size())), System.currentTimeMillis(), value.intValue());
+                        return new WaterSensor(keys.get(random.nextInt(keys.size())), System.currentTimeMillis(), random.nextInt(vcUpperBD));
+//                        return new WaterSensor(keys.get(random.nextInt(keys.size())), System.currentTimeMillis(), value.intValue());
                     }
                 },
                 1000L,
