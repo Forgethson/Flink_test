@@ -18,7 +18,7 @@ public class DataSourceUtil {
 
     public static DataStreamSource<WaterSensor> getWaterSensorDataStreamSource(StreamExecutionEnvironment env) {
         List<String> keys = Arrays.asList("s1", "s2", "s3");
-        int vcUpperBD = 3;
+        int vcUpperBD = 15;
         DataGeneratorSource<WaterSensor> dataGeneratorSource = new DataGeneratorSource<>(
                 new GeneratorFunction<Long, WaterSensor>() {
                     @Override
@@ -51,6 +51,23 @@ public class DataSourceUtil {
                 Types.INT
         );
         DataStreamSource<Integer> numberDS = env.fromSource(dataGeneratorSource, WatermarkStrategy.noWatermarks(), "number-data-generator");
+        return numberDS;
+    }
+
+    public static DataStreamSource<String> getStringDataStreamSource(StreamExecutionEnvironment env) {
+        List<String> words = Arrays.asList("hello", "world", "flink", "spark", "hive", "hbase", "hadoop", "hdfs", "yarn");
+        DataGeneratorSource<String> dataGeneratorSource = new DataGeneratorSource<>(
+                new GeneratorFunction<Long, String>() {
+                    @Override
+                    public String map(Long value) {
+                        return words.get(random.nextInt(words.size()));
+                    }
+                },
+                10000L,
+                RateLimiterStrategy.perSecond(3),
+                Types.STRING
+        );
+        DataStreamSource<String> numberDS = env.fromSource(dataGeneratorSource, WatermarkStrategy.noWatermarks(), "string-data-generator");
         return numberDS;
     }
 }
