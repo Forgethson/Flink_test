@@ -3,7 +3,7 @@ package com.atguigu.partition;
 import org.apache.flink.api.common.functions.Partitioner;
 
 /**
- * TODO
+ * 自定义分区器
  *
  * @author cjp
  * @version 1.0
@@ -11,6 +11,6 @@ import org.apache.flink.api.common.functions.Partitioner;
 public class MyPartitioner implements Partitioner<String> {
     @Override
     public int partition(String key, int numPartitions) {
-        return Integer.parseInt(key) % numPartitions;
+        return key.hashCode() % numPartitions;
     }
 }

@@ -4,7 +4,7 @@ import com.atguigu.bean.WaterSensor;
 import org.apache.flink.api.common.functions.MapFunction;
 
 /**
- * TODO
+ * 用户自定义函数（UDF）
  *
  * @author cjp
  * @version 1.0

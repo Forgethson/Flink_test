@@ -29,7 +29,6 @@ public class StateTTLDemo {
         env.setParallelism(1);
 
 
-
         SingleOutputStreamOperator<WaterSensor> sensorDS = env
                 .socketTextStream("hadoop102", 7777)
                 .map(new WaterSensorMapFunction())
@@ -39,7 +38,7 @@ public class StateTTLDemo {
                                 .withTimestampAssigner((element, ts) -> element.getTs() * 1000L)
                 );
 
-        sensorDS.keyBy(r -> r.getId())
+        sensorDS.keyBy(WaterSensor::getId)
                 .process(
                         new KeyedProcessFunction<String, WaterSensor, String>() {
 
@@ -50,7 +49,7 @@ public class StateTTLDemo {
                             public void open(Configuration parameters) throws Exception {
                                 super.open(parameters);
 
-                                // TODO 1.创建 StateTtlConfig
+                                // 1.创建 StateTtlConfig
                                 StateTtlConfig stateTtlConfig = StateTtlConfig
                                         .newBuilder(Time.seconds(5)) // 过期时间5s
 //                                        .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite) // 状态 创建和写入（更新） 更新 过期时间
@@ -58,7 +57,7 @@ public class StateTTLDemo {
                                         .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired) // 不返回过期的状态值
                                         .build();
 
-                                // TODO 2.状态描述器 启用 TTL
+                                // 2.状态描述器 启用 TTL
                                 ValueStateDescriptor<Integer> stateDescriptor = new ValueStateDescriptor<>("lastVcState", Types.INT);
                                 stateDescriptor.enableTimeToLive(stateTtlConfig);
 

@@ -40,7 +40,7 @@ public class KeyedMapStateDemo {
                                 .withTimestampAssigner((element, ts) -> element.getTs() * 1000L)
                 );
 
-        sensorDS.keyBy(r -> r.getId())
+        sensorDS.keyBy(WaterSensor::getId)
                 .process(
                         new KeyedProcessFunction<String, WaterSensor, String>() {
 
@@ -49,7 +49,7 @@ public class KeyedMapStateDemo {
                             @Override
                             public void open(Configuration parameters) throws Exception {
                                 super.open(parameters);
-                                vcCountMapState = getRuntimeContext().getMapState(new MapStateDescriptor<Integer, Integer>("vcCountMapState", Types.INT, Types.INT));
+                                vcCountMapState = getRuntimeContext().getMapState(new MapStateDescriptor<>("vcCountMapState", Types.INT, Types.INT));
                             }
 
                             @Override

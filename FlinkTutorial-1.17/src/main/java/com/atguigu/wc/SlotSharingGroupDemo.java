@@ -16,21 +16,18 @@ import org.apache.flink.util.Collector;
  */
 public class SlotSharingGroupDemo {
     public static void main(String[] args) throws Exception {
-        // TODO 1. 创建执行环境
-//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        // 1. 创建执行环境
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         // IDEA运行时，也可以看到webui，一般用于本地测试
         // 需要引入一个依赖 flink-runtime-web
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());
-
+//        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());
         // 在idea运行，不指定并行度，默认就是 电脑的 线程数
         env.setParallelism(1);
 
+        // 2. 读取数据： socket
+        DataStreamSource<String> socketDS = env.socketTextStream("node1", 7777);
 
-
-        // TODO 2. 读取数据： socket
-        DataStreamSource<String> socketDS = env.socketTextStream("hadoop102", 7777);
-
-        // TODO 3. 处理数据: 切换、转换、分组、聚合
+        // 3. 处理数据: 切换、转换、分组、聚合
         SingleOutputStreamOperator<Tuple2<String,Integer>> sum = socketDS
                 .flatMap(
                         (String value, Collector<String> out) -> {
@@ -41,16 +38,14 @@ public class SlotSharingGroupDemo {
                         }
                 )
                 .returns(Types.STRING)
-                .map(word -> Tuple2.of(word, 1)).slotSharingGroup("aaa")
+                .map(word -> Tuple2.of(word, 1))
+//                .slotSharingGroup("aaa")
                 .returns(Types.TUPLE(Types.STRING,Types.INT))
                 .keyBy(value -> value.f0)
                 .sum(1);
-
-
-        // TODO 4. 输出
+        // 4. 输出
         sum.print();
-
-        // TODO 5. 执行
+        // 5. 执行
         env.execute();
     }
 }
@@ -67,8 +62,8 @@ public class SlotSharingGroupDemo {
        并行度是一种动态的概念，表示 实际运行 占用了 几个
 
     2）要求： slot数量 >= job并行度（算子最大并行度），job才能运行
-       TODO 注意：如果是yarn模式，动态申请
-         --》 TODO 申请的TM数量 = job并行度 / 每个TM的slot数，向上取整
+       注意：如果是yarn模式，动态申请
+         --》申请的TM数量 = job并行度 / 每个TM的slot数，向上取整
        比如session： 一开始 0个TaskManager，0个slot
          --》 提交一个job，并行度10
             --》 10/3,向上取整，申请4个tm，

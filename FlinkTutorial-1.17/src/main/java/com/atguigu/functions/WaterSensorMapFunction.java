@@ -4,12 +4,12 @@ import com.atguigu.bean.WaterSensor;
 import org.apache.flink.api.common.functions.MapFunction;
 
 /**
- * TODO
+ * 用户自定义函数（UDF）
  *
  * @author cjp
  * @version 1.0
  */
-public class WaterSensorMapFunction implements MapFunction<String,WaterSensor> {
+public class WaterSensorMapFunction implements MapFunction<String, WaterSensor> {
     @Override
     public WaterSensor map(String value) throws Exception {
         String[] datas = value.split(",");

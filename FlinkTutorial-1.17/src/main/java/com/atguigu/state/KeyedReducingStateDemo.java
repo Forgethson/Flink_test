@@ -48,19 +48,18 @@ public class KeyedReducingStateDemo {
                             @Override
                             public void open(Configuration parameters) throws Exception {
                                 super.open(parameters);
-                                vcSumReducingState = getRuntimeContext()
-                                        .getReducingState(
-                                                new ReducingStateDescriptor<Integer>(
-                                                        "vcSumReducingState",
-                                                        new ReduceFunction<Integer>() {
-                                                            @Override
-                                                            public Integer reduce(Integer value1, Integer value2) throws Exception {
-                                                                return value1 + value2;
-                                                            }
-                                                        },
-                                                        Types.INT
-                                                )
-                                        );
+                                vcSumReducingState = getRuntimeContext().getReducingState(
+                                        new ReducingStateDescriptor<>(
+                                                "vcSumReducingState",
+                                                new ReduceFunction<Integer>() {
+                                                    @Override
+                                                    public Integer reduce(Integer value1, Integer value2) {
+                                                        return value1 + value2;
+                                                    }
+                                                },
+                                                Types.INT
+                                        )
+                                );
                             }
 
                             @Override

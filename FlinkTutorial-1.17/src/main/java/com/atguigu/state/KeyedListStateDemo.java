@@ -48,7 +48,7 @@ public class KeyedListStateDemo {
                             @Override
                             public void open(Configuration parameters) throws Exception {
                                 super.open(parameters);
-                                vcListState = getRuntimeContext().getListState(new ListStateDescriptor<Integer>("vcListState", Types.INT));
+                                vcListState = getRuntimeContext().getListState(new ListStateDescriptor<>("vcListState", Types.INT));
                             }
 
                             @Override

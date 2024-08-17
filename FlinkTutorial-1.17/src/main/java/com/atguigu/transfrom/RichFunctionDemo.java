@@ -15,36 +15,36 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
  */
 public class RichFunctionDemo {
     public static void main(String[] args) throws Exception {
-//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+//        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());
         env.setParallelism(2);
 
-        DataStreamSource<String> source = env.socketTextStream("hadoop102", 7777);
-        SingleOutputStreamOperator<Integer> map = source.map(new RichMapFunction<String, Integer>() {
+        DataStreamSource<String> source = env.socketTextStream("node1", 7777);
+        SingleOutputStreamOperator<String> map = source.map(
+                new RichMapFunction<String, String>() {
+                    @Override
+                    public void open(Configuration parameters) throws Exception {
+                        super.open(parameters);
+                        System.out.println(
+                                "子任务编号=" + getRuntimeContext().getIndexOfThisSubtask()
+                                        + "，子任务名称=" + getRuntimeContext().getTaskNameWithSubtasks()
+                                        + ",调用open()");
+                    }
 
-            @Override
-            public void open(Configuration parameters) throws Exception {
-                super.open(parameters);
-                System.out.println(
-                        "子任务编号=" + getRuntimeContext().getIndexOfThisSubtask()
-                                + "，子任务名称=" + getRuntimeContext().getTaskNameWithSubtasks()
-                                + ",调用open()");
-            }
+                    @Override
+                    public void close() throws Exception {
+                        super.close();
+                        System.out.println(
+                                "子任务编号=" + getRuntimeContext().getIndexOfThisSubtask()
+                                        + "，子任务名称=" + getRuntimeContext().getTaskNameWithSubtasks()
+                                        + ",调用close()");
+                    }
 
-            @Override
-            public void close() throws Exception {
-                super.close();
-                System.out.println(
-                        "子任务编号=" + getRuntimeContext().getIndexOfThisSubtask()
-                                + "，子任务名称=" + getRuntimeContext().getTaskNameWithSubtasks()
-                                + ",调用close()");
-            }
-
-            @Override
-            public Integer map(String value) throws Exception {
-                return Integer.parseInt(value) + 1;
-            }
-        });
+                    @Override
+                    public String map(String value) {
+                        return value + "_maped";
+                    }
+                });
 
 
         /**
@@ -83,10 +83,7 @@ public class RichFunctionDemo {
 //                return value + 1;
 //            }
 //        });
-
-
         map.print();
-
         env.execute();
     }
 }

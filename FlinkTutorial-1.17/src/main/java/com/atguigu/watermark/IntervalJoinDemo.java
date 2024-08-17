@@ -8,6 +8,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -53,7 +54,7 @@ public class IntervalJoinDemo {
                                 .withTimestampAssigner((value, ts) -> value.f1 * 1000L)
                 );
 
-        // TODO interval join
+        // interval join
         //1. 分别做keyby，key其实就是关联条件
         KeyedStream<Tuple2<String, Integer>, String> ks1 = ds1.keyBy(r1 -> r1.f0);
         KeyedStream<Tuple3<String, Integer, Integer>, String> ks2 = ds2.keyBy(r2 -> r2.f0);
@@ -61,24 +62,21 @@ public class IntervalJoinDemo {
         //2. 调用 interval join
         ks1.intervalJoin(ks2)
                 .between(Time.seconds(-2), Time.seconds(2))
-                .process(
-                        new ProcessJoinFunction<Tuple2<String, Integer>, Tuple3<String, Integer, Integer>, String>() {
-                            /**
-                             * 两条流的数据匹配上，才会调用这个方法
-                             * @param left  ks1的数据
-                             * @param right ks2的数据
-                             * @param ctx   上下文
-                             * @param out   采集器
-                             * @throws Exception
-                             */
-                            @Override
-                            public void processElement(Tuple2<String, Integer> left, Tuple3<String, Integer, Integer> right, Context ctx, Collector<String> out) throws Exception {
-                                // 进入这个方法，是关联上的数据
-                                out.collect(left + "<------>" + right);
-                            }
-                        })
+                .process(new ProcessJoinFunction<Tuple2<String, Integer>, Tuple3<String, Integer, Integer>, String>() {
+                    /**
+                     * 两条流的数据匹配上，才会调用这个方法
+                     * @param left  ks1的数据
+                     * @param right ks2的数据
+                     * @param ctx   上下文
+                     * @param out   采集器
+                     */
+                    @Override
+                    public void processElement(Tuple2<String, Integer> left, Tuple3<String, Integer, Integer> right, Context ctx, Collector<String> out) {
+                        // 进入这个方法，是关联上的数据
+                        out.collect(left + "<------>" + right);
+                    }
+                })
                 .print();
-
 
 
         env.execute();

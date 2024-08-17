@@ -31,12 +31,8 @@ public class SimpleAggregateDemo {
                 new WaterSensor("s2", 2L, 2),
                 new WaterSensor("s3", 3L, 3)
         );
-
-
-
-
-        KeyedStream<WaterSensor, String> sensorKS = sensorDS
-                .keyBy(new KeySelector<WaterSensor, String>() {
+        KeyedStream<WaterSensor, String> sensorKS = sensorDS.keyBy(
+                new KeySelector<WaterSensor, String>() {
                     @Override
                     public String getKey(WaterSensor value) throws Exception {
                         return value.getId();
@@ -47,14 +43,13 @@ public class SimpleAggregateDemo {
 //        env.execute();
 
         /**
-         * TODO 简单聚合算子
+         * 简单聚合算子
          *  1、 keyby之后才能调用
          *  2、 分组内的聚合：对同一个key的数据进行聚合
          */
         // 传位置索引的，适用于 Tuple类型，POJO不行
 //        SingleOutputStreamOperator<WaterSensor> result = sensorKS.sum(2);
 //        SingleOutputStreamOperator<WaterSensor> result = sensorKS.sum("vc");
-
 
         /**
          *   max\maxby的区别： 同min
@@ -68,10 +63,6 @@ public class SimpleAggregateDemo {
 
         System.out.println("聚合后：");
         result.print();
-
-
         env.execute();
     }
-
-
 }

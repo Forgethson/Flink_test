@@ -8,6 +8,7 @@ import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
 import org.apache.flink.connector.jdbc.JdbcStatementBuilder;
 import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
@@ -16,7 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * TODO
+ * 写入mysql
  *
  * @author cjp
  * @version 1.0
@@ -25,15 +26,15 @@ public class SinkMySQL {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
-
-
-        SingleOutputStreamOperator<WaterSensor> sensorDS = env
-                .socketTextStream("hadoop102", 7777)
-                .map(new WaterSensorMapFunction());
-
+        DataStreamSource<WaterSensor> sensorDS = env.fromElements(
+                new WaterSensor("s1", 1L, 1),
+                new WaterSensor("s2", 3L, 3),
+                new WaterSensor("s3", 3L, 3),
+                new WaterSensor("s4", 3L, 3)
+        );
 
         /**
-         * TODO 写入mysql
+         * 写入mysql
          * 1、只能用老的sink写法： addsink
          * 2、JDBCSink的4个参数:
          *    第一个参数： 执行的sql，一般就是 insert into
@@ -58,17 +59,13 @@ public class SinkMySQL {
                         .withBatchIntervalMs(3000) // 批次的时间
                         .build(),
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl("jdbc:mysql://hadoop102:3306/test?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8")
+                        .withUrl("jdbc:mysql://node1:3306/bigdata?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8")
                         .withUsername("root")
-                        .withPassword("000000")
+                        .withPassword("123456")
                         .withConnectionCheckTimeoutSeconds(60) // 重试的超时时间
                         .build()
         );
-
-
         sensorDS.addSink(jdbcSink);
-
-
         env.execute();
     }
 }

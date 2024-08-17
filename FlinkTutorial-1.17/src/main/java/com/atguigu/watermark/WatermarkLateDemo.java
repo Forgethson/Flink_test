@@ -66,7 +66,6 @@ public class WatermarkLateDemo {
         process.print();
         // 从主流获取侧输出流，打印
         process.getSideOutput(lateTag).printToErr("关窗后的迟到数据");
-
         env.execute();
     }
 }
