@@ -7,6 +7,8 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * TODO
  *
@@ -16,12 +18,16 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 public class SimpleAggregateDemo {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(1);
+//        env.setParallelism(1);
 
 
         DataStreamSource<WaterSensor> sensorDS = env.fromElements(
                 new WaterSensor("s1", 1L, 1),
-                new WaterSensor("s1", 11L, 11),
+                new WaterSensor("s1", 2L, 2),
+                new WaterSensor("s1", 3L, 3),
+                new WaterSensor("s1", 4L, 7),
+                new WaterSensor("s1", 5L, 3),
+                new WaterSensor("s1", 6L, 8),
                 new WaterSensor("s2", 2L, 2),
                 new WaterSensor("s3", 3L, 3)
         );
@@ -36,6 +42,9 @@ public class SimpleAggregateDemo {
                         return value.getId();
                     }
                 });
+//        System.out.println("分区后：");
+//        sensorKS.print();
+//        env.execute();
 
         /**
          * TODO 简单聚合算子
@@ -57,6 +66,7 @@ public class SimpleAggregateDemo {
         SingleOutputStreamOperator<WaterSensor> result = sensorKS.maxBy("vc");
 //        SingleOutputStreamOperator<WaterSensor> result = sensorKS.minby("vc");
 
+        System.out.println("聚合后：");
         result.print();
 
 

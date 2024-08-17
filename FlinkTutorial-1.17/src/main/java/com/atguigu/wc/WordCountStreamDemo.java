@@ -21,7 +21,7 @@ public class WordCountStreamDemo {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // TODO 2.读取数据:从文件读
-        DataStreamSource<String> lineDS = env.readTextFile("input/word.txt");
+        DataStreamSource<String> lineDS = env.readTextFile("./FlinkTutorial-1.17/input/word.txt");
 
         // TODO 3.处理数据: 切分、转换、分组、聚合
         // TODO 3.1 切分、转换
